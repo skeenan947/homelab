@@ -1,0 +1,54 @@
+apiVersion: k0s.k0sproject.io/v1beta1
+kind: ClusterConfig
+metadata:
+  name: home
+spec:
+  api:
+    address: 192.168.1.225
+    sans:
+    - 192.168.1.225
+    - 192.168.1.248
+    - 127.0.0.1
+  extensions:
+    helm:
+      charts:
+      - chartname: traefik/traefik
+        name: traefik
+        namespace: default
+        values: |
+          service:
+            annotations:
+              external-dns.alpha.kubernetes.io/hostname: traefik.keenan.dev
+          ingressRoute:
+            dashboard:
+              enabled: true
+          ports:
+            web:
+              redirectTo: websecure
+            websecure:
+              tls:
+                enabled: true
+                domains:
+                - main: home.keenan.dev
+          tls:
+            enabled: true
+        version: 10.3.2
+      - chartname: bitnami/metallb
+        name: metallb
+        namespace: default
+        values: |
+          configInline:
+            address-pools:
+            - name: generic-cluster-pool
+              protocol: layer2
+              addresses:
+              - 192.168.0.150-192.168.0.159
+        version: 1.0.1
+      repositories:
+      - name: traefik
+        url: https://helm.traefik.io/traefik
+      - name: bitnami
+        url: https://charts.bitnami.com/bitnami
+    storage:
+      create_default_storage_class: false
+      type: external_storage
