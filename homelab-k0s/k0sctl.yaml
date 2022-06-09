@@ -1,0 +1,74 @@
+apiVersion: k0sctl.k0sproject.io/v1beta1
+kind: Cluster
+metadata:
+  name: k0s-cluster
+spec:
+  hosts:
+  - ssh:
+      address: 192.168.1.230
+      user: skeenan
+      port: 22
+      keyPath: /Users/skeenan/.ssh/id_rsa
+    role: controller+worker
+  - ssh:
+      address: 192.168.1.231
+      user: skeenan
+      port: 22
+      keyPath: /Users/skeenan/.ssh/id_rsa
+    role: controller+worker
+  - ssh:
+      address: 192.168.1.232
+      user: skeenan
+      port: 22
+      keyPath: /Users/skeenan/.ssh/id_rsa
+    role: controller+worker
+  k0s:
+    version: 1.23.6+k0s.2
+    dynamicConfig: true
+    config:
+      spec:
+        extensions:
+          helm:
+            charts:
+            - chartname: traefik/traefik
+              name: traefik
+              namespace: default
+              values: |
+                service:
+                  annotations:
+                    external-dns.alpha.kubernetes.io/hostname: traefik.keenan.dev
+                ingressRoute:
+                  dashboard:
+                    enabled: true
+                ports:
+                  web:
+                    redirectTo: websecure
+                  websecure:
+                    tls:
+                      enabled: true
+                      domains:
+                      - main: home.keenan.dev
+                tls:
+                  enabled: true
+              version: 10.20.1
+            - chartname: bitnami/metallb
+              name: metallb
+              namespace: default
+              values: |
+                configInline:
+                  address-pools:
+                  - name: generic-cluster-pool
+                    protocol: layer2
+                    addresses:
+                    - 192.168.1.240-192.168.1.250
+              version: 3.0.8
+            repositories:
+            - name: traefik
+              url: https://helm.traefik.io/traefik
+            - name: bitnami
+              url: https://charts.bitnami.com/bitnami
+          storage:
+            create_default_storage_class: false
+            type: external_storage
+        telemetry:
+          enabled: true
