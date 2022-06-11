@@ -10,18 +10,21 @@ spec:
       port: 22
       keyPath: /Users/skeenan/.ssh/id_rsa
     role: controller+worker
+    noTaints: true
   - ssh:
       address: 192.168.1.231
       user: skeenan
       port: 22
       keyPath: /Users/skeenan/.ssh/id_rsa
     role: controller+worker
+    noTaints: true
   - ssh:
       address: 192.168.1.232
       user: skeenan
       port: 22
       keyPath: /Users/skeenan/.ssh/id_rsa
     role: controller+worker
+    noTaints: true
   k0s:
     version: 1.23.6+k0s.2
     dynamicConfig: true
