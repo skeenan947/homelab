@@ -11,7 +11,7 @@ spec:
     name: in-cluster
   project: default
   source:
-    path: argocd-apps
+    path: homelab-k0s/argocd-apps
     repoURL: https://github.com/skeenan947/homelab.git
     targetRevision: HEAD
   syncPolicy:
