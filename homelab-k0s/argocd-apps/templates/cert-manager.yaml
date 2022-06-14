@@ -52,6 +52,8 @@ spec:
     helm:
       values: |
         installCRDs: true
+        webhook:
+          enabled: false
   syncPolicy:
     automated:
       prune: true
