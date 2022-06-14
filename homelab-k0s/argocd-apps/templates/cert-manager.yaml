@@ -54,6 +54,7 @@ spec:
         installCRDs: true
         webhook:
           hostNetwork: true
+          securePort: 10271
   syncPolicy:
     automated:
       prune: true
