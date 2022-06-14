@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vaultwarden
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://k8s-at-home.com/charts/
+    chart: vaultwarden
+    targetRevision: 4.2.3
+    helm:
+      values: |
+        env:
+          DATABASE_URL: "mysql://vaultwarden:g7JJxv9rR6Xr&7SC@dsm-home.keenan.dev:3307/vaultwarden"
+          ADMIN_TOKEN: "dyQC8wcZY^4A4J6T!FW!%59^KGG&gKTfmaPv#WWo"
+          YUBICO_CLIENT_ID: "71793"
+          YUBICO_SECRET_KEY: "nzQVbPsNqQIV8wgeTkBDGbMBYYA="
+        persistence:
+          config:
+            enabled: true
+            storageClass: nfs-client
+        postgresql:
+          enabled: false
+        ingress:
+          main:
+            enabled: "true"
+            hosts:
+              - host: vault.home.keenan.dev
+                paths:
+                  - path: /
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
