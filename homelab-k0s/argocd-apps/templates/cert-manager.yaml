@@ -53,7 +53,7 @@ spec:
       values: |
         installCRDs: true
         webhook:
-          enabled: false
+          hostNetwork: true
   syncPolicy:
     automated:
       prune: true
