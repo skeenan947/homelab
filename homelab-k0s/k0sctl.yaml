@@ -30,8 +30,6 @@ spec:
     dynamicConfig: true
     config:
       spec:
-        network:
-          provider: calico
         extensions:
           helm:
             charts:
