@@ -26,7 +26,7 @@ spec:
     role: controller+worker
     noTaints: true
   k0s:
-    version: v1.23.6+k0s.2
+    version: v1.23.8+k0s.0
     dynamicConfig: true
     config:
       spec:
