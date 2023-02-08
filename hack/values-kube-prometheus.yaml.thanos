@@ -1,0 +1,84 @@
+nodeExporter:
+  enabled: false
+grafana:
+  adminPassword: acjvs2aU
+  sidecar:
+    datasources:
+      defaultDatasourceEnabled: false
+  additionalDataSources:
+  - name: thanos-query
+    editable: false
+    isDefault: true
+    type: prometheus
+    url: http://thanos-query-frontend:9090
+    version: 1
+  persistence:
+    enabled: false
+  ingress:
+    enabled: true
+    hosts:
+      - "grafana.kcloud.keenan.dev"
+    tls:
+      - secretName: traefik-keenan-dev-tls
+        hosts:
+          - "grafana.kcloud.keenan.dev"
+kubeProxy:
+  enabled: true
+  service:
+    enabled: true
+prometheus:
+  enabled: true
+  thanosService:
+    enabled: true
+  ingress:
+    enabled: true
+    hosts:
+      - "prometheus.kcloud.keenan.dev"
+    tls:
+      - secretName: traefik-keenan-dev-tls
+        hosts:
+          - "prometheus.kcloud.keenan.dev"
+  prometheusSpec:
+    remoteWrite:
+    - url: "https://vminsert.keenan.dev/insert/0/prometheus/"
+    thanos:
+      image: thanosio/thanos:main-2022-01-22-73f4cf42
+      objectStorageConfig:
+        name: thanos-objstore-secret
+        key: objstore.yml
+    storageSpec:
+      emptyDir:
+        medium: Memory
+    podMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelectorNilUsesHelmValues: "false"
+    additionalScrapeConfigs:
+      - job_name: 'itb-scrape'
+        static_configs:
+          - targets: ['10.0.10.7:8000']
+defaultRules:
+  create: false
+  rules:
+    alertmanager: false
+    etcd: false
+    configReloaders: false
+    general: false
+    k8s: false
+    kubeApiserver: false
+    kubeApiserverAvailability: false
+    kubeApiserverSlos: false
+    kubelet: false
+    kubeProxy: true
+    kubePrometheusGeneral: false
+    kubePrometheusNodeRecording: false
+    kubernetesApps: false
+    kubernetesResources: false
+    kubernetesStorage: false
+    kubernetesSystem: false
+    kubeScheduler: false
+    kubeStateMetrics: false
+    network: false
+    node: false
+    nodeExporterAlerting: false
+    nodeExporterRecording: false
+    prometheus: false
+    prometheusOperator: false

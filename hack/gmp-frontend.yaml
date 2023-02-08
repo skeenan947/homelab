@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gmp-prometheus-query
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gmp-prometheus-query
+  template:
+    metadata:
+      labels:
+        app: gmp-prometheus-query
+    spec:
+      containers:
+      - name: prometheus-query
+        image: "gke.gcr.io/prometheus-engine/frontend:v0.1.1-gke.0"
+        args:
+        - "--web.listen-address=:9090"
+        - "--query.credentials-file=/gmp/key.json"
+        - "--query.project-id=skeenan"
+        ports:
+        - name: web
+          containerPort: 9090
+        readinessProbe:
+          httpGet:
+            path: /-/ready
+            port: web
+        livenessProbe:
+          httpGet:
+            path: /-/healthy
+            port: web
+        volumeMounts:
+        - name: gmp-sa
+          mountPath: /gmp
+          readOnly: true
+      volumes:
+      - name: gmp-sa
+        secret:
+          secretName: gmp-sa
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gmp-prometheus-query
+spec:
+  clusterIP: None
+  selector:
+    app: gmp-prometheus-query
+  ports:
+  - name: web
+    port: 9090
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gmp-prometheus
+spec:
+  rules:
+  - host: gmp-prometheus.home.keenan.dev
+    http:
+      paths:
+      - backend:
+          service:
+            name: gmp-prometheus-query
+            port:
+              number: 9090
+        path: /
+        pathType: ImplementationSpecific
+  tls:
+  - hosts:
+    - gmp-prometheus.home.keenan.dev
+    secretName: gmp-prometheus-tls

@@ -1,0 +1,100 @@
+nodeExporter:
+  enabled: false
+grafana:
+  adminPassword: "acjvs2aU"
+  persistence:
+    enabled: false
+    #type: pvc
+    #storageClassName: oci-bv
+    #size: 5Gi
+  ingress:
+    enabled: true
+    hosts:
+      - "grafana.kcloud.keenan.dev"
+    tls:
+      - secretName: traefik-keenan-dev-tls
+        hosts:
+          - "grafana.kcloud.keenan.dev"
+prometheus:
+  enabled: true
+  ingress:
+    enabled: true
+    hosts:
+      - "prometheus.kcloud.keenan.dev"
+    tls:
+      - secretName: traefik-keenan-dev-tls
+        hosts:
+          - "prometheus.kcloud.keenan.dev"
+  prometheusSpec:
+    secrets:
+    - gmp-sa
+    containers:
+    - name: prometheus
+      args:
+      - --export.label.project-id=skeenan
+      - --export.label.location=us-west1-a
+      - --web.console.templates=/etc/prometheus/consoles
+      - --web.console.libraries=/etc/prometheus/console_libraries
+      - --config.file=/etc/prometheus/config_out/prometheus.env.yaml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=10d
+      - --web.enable-lifecycle
+      - --web.external-url=http://prometheus.kcloud.keenan.dev/
+      - --web.route-prefix=/
+      - --web.config.file=/etc/prometheus/web_config/web-config.yaml
+      - --export.credentials-file=/gmp/key.json
+      env:
+      - name: GOOGLE_APPLICATION_CREDENTIALS
+        value: /gmp/key.json
+      volumeMounts:
+      - name: secret-gmp-sa
+        mountPath: /gmp
+        readOnly: true
+    image:
+      repository: skeenan947/google-managed-prometheus
+      #repository: gke.gcr.io/prometheus-engine/prometheus
+      tag: 2.29.0-arm64
+    storageSpec:
+      emptyDir:
+        medium: Memory
+      #volumeClaimTemplate:
+      #  spec:
+      #    storageClassName: oci-bv
+      #    accessModes: ["ReadWriteOnce"]
+      #    resources:
+      #      requests:
+      #        storage: 10Gi
+    podMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelectorNilUsesHelmValues: "false"
+    additionalScrapeConfigs:
+      - job_name: 'itb-scrape'
+        static_configs:
+          - targets: ['10.0.10.7:8000']
+defaultRules:
+  create: false
+  rules:
+    alertmanager: false
+    etcd: false
+    configReloaders: false
+    general: false
+    k8s: false
+    kubeApiserver: false
+    kubeApiserverAvailability: false
+    kubeApiserverSlos: false
+    kubelet: false
+    kubeProxy: false
+    kubePrometheusGeneral: false
+    kubePrometheusNodeRecording: false
+    kubernetesApps: false
+    kubernetesResources: false
+    kubernetesStorage: false
+    kubernetesSystem: false
+    kubeScheduler: false
+    kubeStateMetrics: false
+    network: false
+    node: false
+    nodeExporterAlerting: false
+    nodeExporterRecording: false
+    prometheus: false
+    prometheusOperator: false
+
